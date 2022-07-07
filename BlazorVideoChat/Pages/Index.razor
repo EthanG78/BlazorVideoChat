@@ -79,6 +79,8 @@
         string CommunicationsConnectionString = 
             _configuration.GetValue<string>("CommunicationService:ConnectionString");
 
+        Console.WriteLine(CommunicationsConnectionString);
+
         var client = new CommunicationIdentityClient(CommunicationsConnectionString);
 
         // Issue an identity and an access token with the "voip" scope for the new identity
@@ -92,6 +94,5 @@
         StateHasChanged();
 
         await _js.InvokeVoidAsync("init", CommunicationsToken);
-        await _js.InvokeVoidAsync("showAlert", CommunicationUser.Id);
     }
 }

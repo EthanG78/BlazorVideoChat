@@ -22,8 +22,6 @@ let localVideoStream;
 let rendererLocal;
 let rendererRemote;
 
-window.showAlert = async (message) => alert(message);
-
 window.init = async (USER_ACCESS_TOKEN) => {
 
     const callClient = new CallClient();

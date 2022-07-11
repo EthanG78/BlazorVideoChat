@@ -30,7 +30,11 @@ namespace BlazorVideoChat.Pages
         protected CommunicationUserIdentifier CommunicationUser = null;
         protected string CommunicationsToken;
         protected DateTimeOffset ExpiresOn;
+
         protected bool IsInitialized { get; set; } = false;
+        protected bool CallInputDisabled { get; set; } = true;
+        protected bool CallButtonDisabled { get; set; } = true;
+
 
         protected override async Task OnInitializedAsync()
         {
@@ -56,14 +60,25 @@ namespace BlazorVideoChat.Pages
         {
             if (CommunicationsToken != null)
             {
-                await _js.InvokeVoidAsync("init", CommunicationsToken, CalleeInput, CallButton, HangUpButton, StopVidButton, StartVidButton);
+                await _js.InvokeVoidAsync("hostVideoChat.init", CommunicationsToken, MyVideo);
+
+                CallInputDisabled = false;
+                CallButtonDisabled = false;
                 IsInitialized = true;
+
                 StateHasChanged();
             }
         }
 
+        protected async Task StartCall()
+        {
+            Console.WriteLine("So you want to start a call?");
+        }
+
         public void Dispose()
         {
+            // TODO:
+            // MAYBE WE CAN DISPOSE OF JS RENDERERS IN HERE??
             Console.WriteLine("Dispose of fun communication stuff");
         }
     }

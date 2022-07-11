@@ -1,6 +1,11 @@
 ﻿@page "/VideoChat"
 @inherits VideoChatBase
-@*Add a way for a user to reaquire a token*@
+
+@*
+    TODO:
+    - Add a way for a user to reaquire a token
+    - Add bootstrap styling
+*@
 
 @if (CommunicationUser == null)
 {
@@ -29,11 +34,13 @@ else
         <input id="callee-id-input"
                type="text"
                placeholder="Who would you like to call?"
-               style="margin-bottom:1em; width: 200px;" disabled="@true" 
+               style="margin-bottom:1em; width: 200px;" 
+               disabled="@CallInputDisabled" 
+               @onclick="StartCall"
                @ref=CalleeInput/>
 
         <div>
-            <button id="call-button" type="button" disabled="@true" @ref=CallButton>
+            <button id="call-button" type="button" disabled="@CallButtonDisabled" @ref=CallButton>
                 start call
             </button>
             &nbsp;

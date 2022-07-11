@@ -1,3 +1,108 @@
 ﻿@page "/"
 
 <h4>This is a video chat demo.</h4>
+
+@using Microsoft.Extensions.Configuration
+@using Azure.Communication;
+@using Azure.Communication.Identity
+@inject IJSRuntime _js;
+@inject IConfiguration _configuration
+
+
+<h4>Azure Communication Services</h4>
+
+@if (CommunicationUser == null)
+{
+    <button class="btn btn-primary" @onclick="GetToken">Get Token</button>
+    <br />
+    <br />
+}
+
+@if (CommunicationUser != null)
+{
+    <p>
+        <b>Created an identity with ID:</b>
+        @CommunicationUser.Id
+    </p>
+    <p>
+        <b>Expires On:</b>
+        @ExpiresOn.DateTime.ToShortDateString()
+        @ExpiresOn.DateTime.ToShortTimeString()
+    </p>
+
+}
+
+<input id="callee-id-input"
+       type="text"
+       placeholder="Who would you like to call?"
+       style="margin-bottom:1em; width: 200px;" disabled="@true" 
+       @ref=CallInput/>
+
+<div>
+    <button id="call-button" type="button" disabled="@true" @ref=CallButton>
+        start call
+    </button>
+    &nbsp;
+    <button id="hang-up-button" type="button" disabled="@true" @ref=HangUpButton>
+        hang up
+    </button>
+    &nbsp;
+    <button id="start-Video" type="button" disabled="@true" @ref=StartVideoButton>
+        start video
+    </button>
+    &nbsp;      
+    <button id="stop-Video" type="button" disabled="@true" @ref=StopVideoButton>
+        stop video
+    </button>
+</div>
+
+<div>Local Video</div>
+
+<div style="height:200px; width:300px; background-color:black; position:relative;">
+    <div id="myVideo" @ref=myVideo
+         style="background-color: black; position:absolute; top:50%; transform: translateY(-50%);">
+    </div>
+</div>
+
+<div>Remote Video</div>
+
+<div style="height:200px; width:300px; background-color:black; position:relative;">
+    <div id="remoteVideo" @ref=remoteVideo
+         style="background-color: black; position:absolute; top:50%; transform: translateY(-50%);">
+    </div>
+</div>
+
+@code {
+    private ElementReference myVideo;
+    private ElementReference remoteVideo;
+    private ElementReference CallInput;
+    private ElementReference CallButton;
+    private ElementReference HangUpButton;
+    private ElementReference StartVideoButton;
+    private ElementReference StopVideoButton;
+    private CommunicationUserIdentifier CommunicationUser = null;
+    private string CommunicationsToken;
+    private DateTimeOffset ExpiresOn;
+
+    private async void GetToken()
+    {
+        string CommunicationsConnectionString =
+            _configuration.GetValue<string>("CommunicationService:ConnectionString");
+
+        Console.WriteLine(CommunicationsConnectionString);
+
+        var client = new CommunicationIdentityClient(CommunicationsConnectionString);
+
+        // Issue an identity and an access token with the "voip" scope for the new identity
+        var identityAndTokenResponse = await client.CreateUserAndTokenAsync(
+            scopes: new[] { CommunicationTokenScope.VoIP });
+
+        CommunicationUser = identityAndTokenResponse.Value.User;
+        CommunicationsToken = identityAndTokenResponse.Value.AccessToken.Token;
+        ExpiresOn = identityAndTokenResponse.Value.AccessToken.ExpiresOn;
+
+        StateHasChanged();
+
+        await _js.InvokeVoidAsync("init", CommunicationsToken, CallInput, CallButton, HangUpButton, StopVideoButton, StartVideoButton, myVideo, remoteVideo);
+    }
+} 

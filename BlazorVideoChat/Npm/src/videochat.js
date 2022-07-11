@@ -11,22 +11,66 @@ import {
 
 let call;
 let callAgent;
-const calleeInput = document.getElementById("callee-id-input");
-const callButton = document.getElementById("call-button");
-const hangUpButton = document.getElementById("hang-up-button");
-const stopVideoButton = document.getElementById("stop-Video");
-const startVideoButton = document.getElementById("start-Video");
 let placeCallOptions;
 let deviceManager;
 let localVideoStream;
 let rendererLocal;
 let rendererRemote;
 
-window.init = async (USER_ACCESS_TOKEN) => {
+let localVideo;
+let remoteVideo;
 
+/*window.hostVideoChat = {
+    init: async (USER_ACCESS_TOKEN) => {
+        const callClient = new CallClient();
+        const tokenCredential = new AzureCommunicationTokenCredential(USER_ACCESS_TOKEN);
+        callAgent = await callClient.createCallAgent(tokenCredential);
+    },
+
+    startcall: async () => {
+
+    },
+
+    stopcall: async () => {
+
+    },
+
+    startvideo: async () => {
+
+    },
+
+    stopvideo: async () => {
+
+    }
+}
+
+window.clientVideoChat = {
+    init: async (USER_ACCESS_TOKEN) => {
+
+    },
+
+    startvideo: async () => {
+
+    },
+
+    stopvideo: async () => {
+
+    }
+}*/
+
+window.init = async (USER_ACCESS_TOKEN, calleeInputDOM, callButtonDOM, hangUpButtonDOM, stopVideoButtonDOM, startVideoButtonDOM, localVid, remoteVid) => {
     const callClient = new CallClient();
     const tokenCredential = new AzureCommunicationTokenCredential(USER_ACCESS_TOKEN);
     callAgent = await callClient.createCallAgent(tokenCredential, { displayName: 'optional ACS user name' });
+
+    const calleeInput = calleeInputDOM;
+    const callButton = callButtonDOM;
+    const hangUpButton = hangUpButtonDOM;
+    const stopVideoButton = stopVideoButtonDOM;
+    const startVideoButton = startVideoButtonDOM;
+
+    localVideo = localVid;
+    remoteVideo = remoteVid;
 
     // Receive an incoming call
     // To handle incoming calls you need to listen to the `incomingCall` event of `callAgent`. 
@@ -141,9 +185,7 @@ window.init = async (USER_ACCESS_TOKEN) => {
 }
 
 function handleVideoStream(remoteVideoStream) {
-
     remoteVideoStream.on('isAvailableChanged', async () => {
-
         if (remoteVideoStream.isAvailable) {
             remoteVideoView(remoteVideoStream);
         } else {
@@ -157,7 +199,6 @@ function handleVideoStream(remoteVideoStream) {
 }
 
 function subscribeToParticipantVideoStreams(remoteParticipant) {
-
     remoteParticipant.on('videoStreamsUpdated', e => {
 
         e.added.forEach(v => {
@@ -171,7 +212,6 @@ function subscribeToParticipantVideoStreams(remoteParticipant) {
 }
 
 function subscribeToRemoteParticipantInCall(callInstance) {
-
     callInstance.on('remoteParticipantsUpdated', e => {
 
         e.added.forEach(p => {
@@ -187,11 +227,11 @@ function subscribeToRemoteParticipantInCall(callInstance) {
 async function localVideoView() {
     rendererLocal = new VideoStreamRenderer(localVideoStream);
     const view = await rendererLocal.createView();
-    document.getElementById("myVideo").appendChild(view.target);
+    localVideo.appendChild(view.target);
 }
 
 async function remoteVideoView(remoteVideoStream) {
     rendererRemote = new VideoStreamRenderer(remoteVideoStream);
     const view = await rendererRemote.createView();
-    document.getElementById("remoteVideo").appendChild(view.target);
+    remoteVideo.appendChild(view.target);
 }

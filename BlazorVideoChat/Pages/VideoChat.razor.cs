@@ -20,6 +20,13 @@ namespace BlazorVideoChat.Pages
 
         protected ElementReference MyVideo;
         protected ElementReference RemoteVideo;
+
+        protected ElementReference CalleeInput;
+        protected ElementReference CallButton;
+        protected ElementReference HangUpButton;
+        protected ElementReference StartVidButton;
+        protected ElementReference StopVidButton;
+
         protected CommunicationUserIdentifier CommunicationUser = null;
         protected string CommunicationsToken;
         protected DateTimeOffset ExpiresOn;
@@ -49,7 +56,7 @@ namespace BlazorVideoChat.Pages
         {
             if (CommunicationsToken != null)
             {
-                await _js.InvokeVoidAsync("init", CommunicationsToken);
+                await _js.InvokeVoidAsync("init", CommunicationsToken, CalleeInput, CallButton, HangUpButton, StopVidButton, StartVidButton);
                 IsInitialized = true;
                 StateHasChanged();
             }

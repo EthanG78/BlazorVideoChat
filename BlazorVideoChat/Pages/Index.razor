@@ -35,11 +35,11 @@
 <input id="callee-id-input"
        type="text"
        placeholder="Who would you like to call?"
-       style="margin-bottom:1em; width: 200px;" disabled="@true" 
+       style="margin-bottom:1em; width: 200px;" disabled="@CallInputDisabled" 
        @ref=CallInput/>
 
 <div>
-    <button id="call-button" type="button" disabled="@true" @ref=CallButton>
+    <button id="call-button" type="button" disabled="@CallButtonDisabled" @ref=CallButton>
         start call
     </button>
     &nbsp;
@@ -80,6 +80,10 @@
     private ElementReference HangUpButton;
     private ElementReference StartVideoButton;
     private ElementReference StopVideoButton;
+
+    private bool CallInputDisabled { get; set; } = true;
+    private bool CallButtonDisabled { get; set; } = true;
+
     private CommunicationUserIdentifier CommunicationUser = null;
     private string CommunicationsToken;
     private DateTimeOffset ExpiresOn;
@@ -101,8 +105,13 @@
         CommunicationsToken = identityAndTokenResponse.Value.AccessToken.Token;
         ExpiresOn = identityAndTokenResponse.Value.AccessToken.ExpiresOn;
 
+        await _js.InvokeVoidAsync("hostVideoChat.init", CommunicationsToken, myVideo);
+
+        CallInputDisabled = false;
+        CallButtonDisabled = false;
+
         StateHasChanged();
 
-        await _js.InvokeVoidAsync("init", CommunicationsToken, CallInput, CallButton, HangUpButton, StopVideoButton, StartVideoButton, myVideo, remoteVideo);
+        //await _js.InvokeVoidAsync("init", CommunicationsToken, CallInput, CallButton, HangUpButton, StopVideoButton, StartVideoButton, myVideo, remoteVideo);
     }
 } 

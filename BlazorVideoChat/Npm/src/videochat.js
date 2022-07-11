@@ -9,42 +9,105 @@ import {
     AzureCommunicationTokenCredential
 } from '@azure/communication-common';
 
-let call;
-let callAgent;
-let placeCallOptions;
-let deviceManager;
-let localVideoStream;
-let rendererLocal;
-let rendererRemote;
 
-let localVideo;
-let remoteVideo;
+// I HATE JAVASCRIPT YAYAYAYAYA
 
-/*window.hostVideoChat = {
-    init: async (USER_ACCESS_TOKEN) => {
-        const callClient = new CallClient();
+// Host variables...
+let hostCallClient;
+let hostCallAgent;
+let hostDevices;
+let hostLocalVideo;
+let hostLocalRender;
+let hostLocalStream;
+let hostRemoteRender;
+let hostCall;
+
+// Client variables
+let clientCallClient;
+let clientCallAgent;
+let clientDevices;
+
+window.hostVideoChat = {
+    init: async (USER_ACCESS_TOKEN, localVidDOM) => {
+        hostLocalVideo = localVidDOM;
+
+        hostCallClient = new CallClient();
         const tokenCredential = new AzureCommunicationTokenCredential(USER_ACCESS_TOKEN);
-        callAgent = await callClient.createCallAgent(tokenCredential);
+        hostCallAgent = await hostCallClient.createCallAgent(tokenCredential);
+        hostDevices = await hostCallClient.getDeviceManager();
     },
 
-    startcall: async () => {
+    startcall: async (userToCall) => {
+        const videoDevices = await hostDevices.getCameras();
+        const videoDeviceInfo = videoDevices[0];
 
+        hostLocalStream = new LocalVideoStream(videoDeviceInfo);
+        let callOptions = { videoOptions: { localVideoStreams: [hostLocalStream] } };
+
+        hostLocalRender = new VideoStreamRenderer(hostLocalStream);
+        const view = await hostLocalRender.createView();
+        hostLocalVideo.appendChild(view.target);
+
+        // TODO: Move these UI controls to C# side
+        //stopVideoButton.disabled = false;
+        //startVideoButton.disabled = true;
+
+        //const userToCall = calleeInput.value;
+
+        hostCall = hostCallAgent.startCall(
+            [{ communicationUserId: userToCall }],
+            callOptions
+        );
+
+        subscribeToRemoteParticipantInCall(hostCall, hostRemoteRender);
+
+        // Move to C#
+        //hangUpButton.disabled = false;
+        //callButton.disabled = true;
+        //calleeInput.disabled = true;
     },
 
     stopcall: async () => {
+        // dispose of the renderers
+        hostLocalRender.dispose();
+        hostRemoteRender.dispose();
 
+        // end the current call
+        await hostCall.hangUp();
+
+        // TODO: Do this in C#
+        //hangUpButton.disabled = true;
+        //callButton.disabled = false;
+        //stopVideoButton.disabled = true;
+        //calleeInput.disabled = false;
     },
 
     startvideo: async () => {
+        await hostCall.startVideo(hostLocalStream);
 
+        hostLocalRender = new VideoStreamRenderer(hostLocalStream);
+        const view = await hostLocalRender.createView();
+        hostLocalVideo.appendChild(view.target);
+
+        // TODO: Do this in C#
+        //stopVideoButton.disabled = false;
+        //startVideoButton.disabled = true;
+        //calleeInput.disabled = true;
     },
 
     stopvideo: async () => {
+        await hostCall.stopVideo(hostLocalStream);
 
+        hostLocalRender.dispose();
+
+        // TODO: Do this in C#
+        //startVideoButton.disabled = false;
+        //calleeInput.disabled = false;
+        //stopVideoButton.disabled = true;
     }
 }
 
-window.clientVideoChat = {
+/*window.clientVideoChat = {
     init: async (USER_ACCESS_TOKEN) => {
 
     },
@@ -58,7 +121,7 @@ window.clientVideoChat = {
     }
 }*/
 
-window.init = async (USER_ACCESS_TOKEN, calleeInputDOM, callButtonDOM, hangUpButtonDOM, stopVideoButtonDOM, startVideoButtonDOM, localVid, remoteVid) => {
+/*window.init = async (USER_ACCESS_TOKEN, calleeInputDOM, callButtonDOM, hangUpButtonDOM, stopVideoButtonDOM, startVideoButtonDOM, localVid) => {
     const callClient = new CallClient();
     const tokenCredential = new AzureCommunicationTokenCredential(USER_ACCESS_TOKEN);
     callAgent = await callClient.createCallAgent(tokenCredential, { displayName: 'optional ACS user name' });
@@ -70,7 +133,6 @@ window.init = async (USER_ACCESS_TOKEN, calleeInputDOM, callButtonDOM, hangUpBut
     const startVideoButton = startVideoButtonDOM;
 
     localVideo = localVid;
-    remoteVideo = remoteVid;
 
     // Receive an incoming call
     // To handle incoming calls you need to listen to the `incomingCall` event of `callAgent`. 
@@ -119,119 +181,61 @@ window.init = async (USER_ACCESS_TOKEN, calleeInputDOM, callButtonDOM, hangUpBut
     callButton.disabled = false;
     calleeInput.disabled = false;
 
-    callButton.addEventListener("click", async () => {
-
-        const videoDevices = await deviceManager.getCameras();
-        const videoDeviceInfo = videoDevices[0];
-
-        localVideoStream = new LocalVideoStream(videoDeviceInfo);
-        placeCallOptions = { videoOptions: { localVideoStreams: [localVideoStream] } };
-        localVideoView();
-
-        stopVideoButton.disabled = false;
-        startVideoButton.disabled = true;
-
-        const userToCall = calleeInput.value;
-
-        call = callAgent.startCall(
-            [{ communicationUserId: userToCall }],
-            placeCallOptions
-        );
-
-        subscribeToRemoteParticipantInCall(call);
-
-        hangUpButton.disabled = false;
-        callButton.disabled = true;
-        calleeInput.disabled = true;
-    });
-
-    hangUpButton.addEventListener("click", async () => {
-
-        // dispose of the renderers
-        rendererLocal.dispose();
-        rendererRemote.dispose();
-
-        // end the current call
-        await call.hangUp();
-
-        // toggle button states
-        hangUpButton.disabled = true;
-        callButton.disabled = false;
-        stopVideoButton.disabled = true;
-        calleeInput.disabled = false;
-    });
-
-    stopVideoButton.addEventListener("click", async () => {
-
-        await call.stopVideo(localVideoStream);
-
-        rendererLocal.dispose();
-
-        startVideoButton.disabled = false;
-        calleeInput.disabled = false;
-        stopVideoButton.disabled = true;
-    });
 
     startVideoButton.addEventListener("click", async () => {
 
-        await call.startVideo(localVideoStream);
-
-        localVideoView();
-
-        stopVideoButton.disabled = false;
-        startVideoButton.disabled = true;
-        calleeInput.disabled = true;
+        
     });
+}*/
+
+async function remoteVideoView(remoteVideoStream, remoteRenderer) {
+    remoteRenderer = new VideoStreamRenderer(remoteVideoStream);
+    const view = await remoteRenderer.createView();
+    remoteVideo.appendChild(view.target);
 }
 
-function handleVideoStream(remoteVideoStream) {
+function handleVideoStream(remoteVideoStream, remoteRenderer) {
     remoteVideoStream.on('isAvailableChanged', async () => {
         if (remoteVideoStream.isAvailable) {
-            remoteVideoView(remoteVideoStream);
+            remoteVideoView(remoteVideoStream, remoteRenderer);
         } else {
-            rendererRemote.dispose();
+            remoteRenderer.dispose();
         }
     });
 
     if (remoteVideoStream.isAvailable) {
-        remoteVideoView(remoteVideoStream);
+        remoteVideoView(remoteVideoStream, remoteRenderer);
     }
 }
 
-function subscribeToParticipantVideoStreams(remoteParticipant) {
+function subscribeToParticipantVideoStreams(remoteParticipant, remoteRenderer) {
     remoteParticipant.on('videoStreamsUpdated', e => {
 
         e.added.forEach(v => {
-            handleVideoStream(v);
+            handleVideoStream(v, remoteRenderer);
         })
     });
 
     remoteParticipant.videoStreams.forEach(v => {
-        handleVideoStream(v);
+        handleVideoStream(v, remoteRenderer);
     });
 }
 
-function subscribeToRemoteParticipantInCall(callInstance) {
+function subscribeToRemoteParticipantInCall(callInstance, remoteRenderer) {
     callInstance.on('remoteParticipantsUpdated', e => {
 
         e.added.forEach(p => {
-            subscribeToParticipantVideoStreams(p);
+            subscribeToParticipantVideoStreams(p, remoteRenderer);
         })
     });
 
     callInstance.remoteParticipants.forEach(p => {
-        subscribeToParticipantVideoStreams(p);
+        subscribeToParticipantVideoStreams(p, remoteRenderer);
     })
 }
 
-async function localVideoView() {
+/*async function localVideoView() {
     rendererLocal = new VideoStreamRenderer(localVideoStream);
     const view = await rendererLocal.createView();
     localVideo.appendChild(view.target);
-}
-
-async function remoteVideoView(remoteVideoStream) {
-    rendererRemote = new VideoStreamRenderer(remoteVideoStream);
-    const view = await rendererRemote.createView();
-    remoteVideo.appendChild(view.target);
-}
+}*/

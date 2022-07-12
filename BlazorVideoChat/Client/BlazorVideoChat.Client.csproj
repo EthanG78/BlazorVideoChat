@@ -5,7 +5,11 @@
     <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
   </PropertyGroup>
 
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+  <Target Name="PreBuild" 
+          BeforeTargets="PreBuildEvent"
+          Inputs="NPM/src/videochat.js"
+          Outputs="wwwroot/js/videochat.bundle.js">
+    <Message Text="Rebuilding Javascript Bundle" />
     <Exec Command="npm install" WorkingDirectory="NPM" />
     <Exec Command="npm run build" WorkingDirectory="NPM" />
   </Target>

@@ -2,7 +2,7 @@
   "name": "npm",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "videochat.js",
   "scripts": {
     "build": "webpack ./src/videochat.js --output-path ../wwwroot/js --output-filename videochat.bundle.js"
   },

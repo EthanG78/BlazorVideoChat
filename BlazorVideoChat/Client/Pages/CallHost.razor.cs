@@ -37,7 +37,7 @@ namespace BlazorVideoChat.Client.Pages
 
             CommModel = await httpClient.GetFromJsonAsync<CommunicationModel>("api/commtoken/");
 
-            await _js.InvokeVoidAsync("init", CommModel.CommunicationsToken, HostVideo, ClientVideo);
+            await _js.InvokeVoidAsync("hostVideoChat.init", CommModel.CommunicationsToken, HostVideo, ClientVideo);
 
             StateHasChanged();
         }

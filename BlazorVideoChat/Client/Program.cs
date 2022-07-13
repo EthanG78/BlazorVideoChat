@@ -19,10 +19,10 @@ namespace BlazorVideoChat.Client
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
             builder.RootComponents.Add<App>("#app");
 
-            builder.Services.AddHttpClient("BlazorVideoChat.ServerAPI", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress))
+            builder.Services.AddHttpClient("BlazorVideoChat.ServerAPI.Private", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress))
                 .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
 
-            builder.Services.AddSingleton<ICommSettingsService, CommSettingsService>();
+            builder.Services.AddHttpClient("BlazorVideoChat.ServerAPI.Public", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
 
             // Supply HttpClient instances that include access tokens when making requests to the server project
             builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("BlazorVideoChat.ServerAPI"));
@@ -30,10 +30,6 @@ namespace BlazorVideoChat.Client
             builder.Services.AddApiAuthorization();
 
             var host = builder.Build();
-
-            // Set the Azure Communications Service connection string for use in app
-            var _commSettingsService = host.Services.GetRequiredService<ICommSettingsService>();
-            _commSettingsService.SetConnectionString(builder.Configuration["CommunicationService:ConnectionString"]);
 
             await host.RunAsync();
         }

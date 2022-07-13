@@ -6,6 +6,9 @@ using Microsoft.JSInterop;
 using System;
 using System.Threading.Tasks;
 using BlazorVideoChat.Client.Services;
+using System.Net.Http;
+using System.Net.Http.Json;
+using BlazorVideoChat.Shared;
 
 namespace BlazorVideoChat.Client.Pages
 {
@@ -15,50 +18,51 @@ namespace BlazorVideoChat.Client.Pages
         IJSRuntime _js { get; set; }
 
         [Inject]
-        ICommSettingsService _commSettingsService { get; set; }
+        IHttpClientFactory _httpClientFactory { get; set; }
 
-        protected ElementReference MyVideo;
-        protected ElementReference RemoteVideo;
+        protected ElementReference HostVideo;
+        protected ElementReference ClientVideo;
 
         protected string CalleeInput { get; set; }
-        protected ElementReference CallButton;
-        protected ElementReference HangUpButton;
-        protected ElementReference StartVidButton;
-        protected ElementReference StopVidButton;
 
-        protected CommunicationUserIdentifier CommunicationUser = null;
-        protected string CommunicationsToken;
-        protected DateTimeOffset ExpiresOn;
+        protected CommunicationModel CommModel { get; set; } = null;
 
-
+        protected bool CallInputDisabled { get; set; } = false;
+        protected bool CallButtonDisabled { get; set; } = false;
+        protected bool HangUpButtonDisabled { get; set; } = true;
 
         protected override async Task OnInitializedAsync()
         {
-            var connStr = _commSettingsService.GetConnectionString();
+            var httpClient = _httpClientFactory.CreateClient("BlazorVideoChat.ServerAPI.Public");
 
-            Console.WriteLine(connStr);
+            CommModel = await httpClient.GetFromJsonAsync<CommunicationModel>("api/commtoken/");
 
-            /*var client = new CommunicationIdentityClient(CommunicationsConnectionString);
+            await _js.InvokeVoidAsync("init", CommModel.CommunicationsToken, HostVideo, ClientVideo);
 
-            // Issue an identity and an access token with the "voip" scope for the new identity
-            var identityAndTokenResponse = await client.CreateUserAndTokenAsync(
-                scopes: new[] { CommunicationTokenScope.VoIP });
-
-            CommunicationUser = identityAndTokenResponse.Value.User;
-            CommunicationsToken = identityAndTokenResponse.Value.AccessToken.Token;
-            ExpiresOn = identityAndTokenResponse.Value.AccessToken.ExpiresOn;
-
-            StateHasChanged();*/
+            StateHasChanged();
         }
 
-       /* protected async Task InitializeCall()
+        protected async Task Call()
         {
-            if (CommunicationsToken != null)
-            {
-                await _js.InvokeVoidAsync("hostVideoChat.init", CommunicationsToken, MyVideo, RemoteVideo);
+            Console.WriteLine(CalleeInput);
+            // MAKE JS CALL
+            await _js.InvokeVoidAsync("hostVideoChat.startcall", CalleeInput);
 
-                StateHasChanged();
-            }
-        }*/
+            CallInputDisabled = true;
+            CallButtonDisabled = true;
+            HangUpButtonDisabled = false;
+            StateHasChanged();
+        }
+
+        protected async Task HangUp()
+        {
+            // MAKE JS CALL
+            await _js.InvokeVoidAsync("hostVideoChat.stopcall");
+
+            CallInputDisabled = false;
+            CallButtonDisabled = false;
+            HangUpButtonDisabled = true;
+            StateHasChanged();
+        }
     }
 }

@@ -5,7 +5,43 @@
     <div class="row">
         <h3>Host a call</h3>
     </div>
-    
+    @if (CommModel != null)
+    {
+        <div class="row">
+            <label for="basic-url">Client To Call</label>
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon3">
+                        <span class="oi oi-person" aria-hidden="true"></span>
+                    </span>
 
-
+                </div>
+                <input type="text" class="form-control" id="basic-url" aria-describedby="basic-addon3" @bind-value="CalleeInput">
+            </div>
+        </div>
+        <div class="row">
+            <button type="button" class="btn btn-primary ml-2 mb-2" disbaled="@CallButtonDisabled" @onclick="Call">Call</button>
+            <button type="button" class="btn btn-primary ml-2 mb-2" disabled="@HangUpButtonDisabled" @onclick="HangUp">Hangup</button>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div style="height:200px; width:300px; background-color:black; position:relative;">
+                    <div id="hostVideo" @ref="HostVideo"
+                     style="background-color: black; position:absolute; top:50%; transform: translateY(-50%);">
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div style="height:200px; width:300px; background-color:black; position:relative;">
+                    <div id="clientVideo" @ref="ClientVideo"
+                     style="background-color: black; position:absolute; top:50%; transform: translateY(-50%);">
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <p>Generating user identity and token...</p>
+    }
 </div>

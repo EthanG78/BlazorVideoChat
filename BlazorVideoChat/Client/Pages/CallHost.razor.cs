@@ -20,8 +20,10 @@ namespace BlazorVideoChat.Client.Pages
         [Inject]
         IHttpClientFactory _httpClientFactory { get; set; }
 
-        protected ElementReference HostVideo;
-        protected ElementReference ClientVideo;
+        private HttpClient _httpClient { get; set; }
+
+        protected ElementReference HostVideo { get; set; }
+        protected ElementReference ClientVideo { get; set; }
 
         protected string CalleeInput { get; set; }
 
@@ -33,19 +35,33 @@ namespace BlazorVideoChat.Client.Pages
 
         protected override async Task OnInitializedAsync()
         {
-            var httpClient = _httpClientFactory.CreateClient("BlazorVideoChat.ServerAPI.Public");
+            _httpClient = _httpClientFactory.CreateClient("BlazorVideoChat.ServerAPI.Public");
 
-            CommModel = await httpClient.GetFromJsonAsync<CommunicationModel>("api/commtoken/");
+            await base.OnInitializedAsync();
+        }
 
-            await _js.InvokeVoidAsync("hostVideoChat.init", CommModel.CommunicationsToken, HostVideo, ClientVideo);
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            // We cannot use ElementReferences inside lifecycle methods unless it is OnAfterRender*
+            // Therefore I must move the above call to that method.
+            // Source: https://blazor-university.com/javascript-interop/calling-javascript-from-dotnet/passing-html-element-references/\
+            
+            if (firstRender)
+            {
+                CommModel = await _httpClient.GetFromJsonAsync<CommunicationModel>("api/commtoken/");
 
-            StateHasChanged();
+                if (CommModel is null) throw new ArgumentNullException(nameof(CommModel));
+
+                await _js.InvokeVoidAsync("hostVideoChat.init", CommModel.CommunicationsToken, HostVideo, ClientVideo);
+
+                StateHasChanged();
+            }
+
         }
 
         protected async Task Call()
         {
             Console.WriteLine(CalleeInput);
-            // MAKE JS CALL
             await _js.InvokeVoidAsync("hostVideoChat.startcall", CalleeInput);
 
             CallInputDisabled = true;
@@ -56,7 +72,6 @@ namespace BlazorVideoChat.Client.Pages
 
         protected async Task HangUp()
         {
-            // MAKE JS CALL
             await _js.InvokeVoidAsync("hostVideoChat.stopcall");
 
             CallInputDisabled = false;

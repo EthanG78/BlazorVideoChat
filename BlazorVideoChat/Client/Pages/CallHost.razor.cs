@@ -22,8 +22,8 @@ namespace BlazorVideoChat.Client.Pages
 
         private HttpClient _httpClient { get; set; }
 
-        protected ElementReference HostVideo { get; set; }
-        protected ElementReference ClientVideo { get; set; }
+        protected ElementReference MyVideo { get; set; }
+        protected ElementReference RemoteVideo { get; set; }
 
         protected string CalleeInput { get; set; }
 
@@ -52,7 +52,7 @@ namespace BlazorVideoChat.Client.Pages
 
                 if (CommModel is null) throw new ArgumentNullException(nameof(CommModel));
 
-                await _js.InvokeVoidAsync("hostVideoChat.init", CommModel.CommunicationsToken, HostVideo, ClientVideo);
+                await _js.InvokeVoidAsync("hostVideoChat.init", CommModel.CommunicationsToken, MyVideo, RemoteVideo);
 
                 StateHasChanged();
             }

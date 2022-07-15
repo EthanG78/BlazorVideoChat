@@ -48,3 +48,17 @@ a, .btn-link {
         right: 0.75rem;
         top: 0.5rem;
     }
+
+.video {
+    background-color: black; 
+    position: absolute; 
+    top: 50%; 
+    transform: translateY(-50%);
+}
+
+.video-container {
+    height: 200px;
+    width: 300px;
+    background-color: black;
+    position: relative;
+}

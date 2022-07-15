@@ -28,17 +28,13 @@
     </div>
     <div class="row">
         <div class="col">
-            <div style="height:200px; width:300px; background-color:black; position:relative;">
-                <div @ref="MyVideo"
-                     style="background-color: black; position:absolute; top:50%; transform: translateY(-50%);">
-                </div>
+            <div class="video-container">
+                <div @ref="MyVideo" class="video"></div>
             </div>
         </div>
         <div class="col">
-            <div style="height:200px; width:300px; background-color:black; position:relative;">
-                <div @ref="RemoteVideo"
-                     style="background-color: black; position:absolute; top:50%; transform: translateY(-50%);">
-                </div>
+            <div class="video-container">
+                <div @ref="RemoteVideo" class="video"></div>
             </div>
         </div>
     </div>

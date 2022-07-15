@@ -40,7 +40,7 @@ namespace BlazorVideoChat.Client.Pages
 
                 if (CommModel is null) throw new ArgumentNullException(nameof(CommModel));
 
-                await _js.InvokeVoidAsync("hostVideoChat.init", CommModel.CommunicationsToken, MyVideo, RemoteVideo);
+                await _js.InvokeVoidAsync("clientVideoChat.init", CommModel.CommunicationsToken, MyVideo, RemoteVideo);
 
                 StateHasChanged();
             }

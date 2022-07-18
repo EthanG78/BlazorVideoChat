@@ -3,7 +3,7 @@
 
 <div class="container">
     <div class="row">
-        <h3>Attend a call</h3>
+        <h3>Request a call</h3>
     </div>
     @if (CommModel == null)
     {
@@ -11,8 +11,21 @@
     }
     else
     {
-        <p>Your unique ID to be provided to host:
-            <br/><strong>@CommModel.CommunicationUser.Id</strong></p>
+        <div class="row">
+            <label for="basic-url">Please enter the email of the call host:</label>
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon3">
+                        <span class="oi oi-person" aria-hidden="true"></span>
+                    </span>
+
+                </div>
+                <input type="text" class="form-control" id="basic-url" aria-describedby="basic-addon3" disabled="@RequestCallDisabled" @bind-value="HostEmail">
+            </div>
+        </div>
+        <div class="row">
+            <button type="button" class="btn btn-primary ml-2 mb-2" disabled="@(String.IsNullOrEmpty(HostEmail) || RequestCallDisabled)" @onclick="RequestCall">Request Call</button>
+        </div>
     }
     <div class="row">
         <div class="col">

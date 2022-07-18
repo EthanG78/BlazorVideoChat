@@ -1,5 +1,6 @@
 ﻿@page "/host"
 @inherits CallHostBase
+@attribute [Authorize]
 
 <div class="container">
     <div class="row">
@@ -23,7 +24,7 @@
         </div>
     </div>
     <div class="row">
-        <button type="button" class="btn btn-primary ml-2 mb-2" disbaled="@CallButtonDisabled" @onclick="Call">Call</button>
+        <button type="button" class="btn btn-primary ml-2 mb-2" disabled="@CallButtonDisabled" @onclick="Call">Call</button>
         <button type="button" class="btn btn-primary ml-2 mb-2" disabled="@HangUpButtonDisabled" @onclick="HangUp">Hangup</button>
     </div>
     <div class="row">

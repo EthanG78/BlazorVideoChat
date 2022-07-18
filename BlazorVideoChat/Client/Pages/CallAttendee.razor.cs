@@ -21,8 +21,8 @@ namespace BlazorVideoChat.Client.Pages
         protected ElementReference MyVideo { get; set; }
         protected ElementReference RemoteVideo { get; set; }
 
-        protected string CalleeInput { get; set; }
-
+        protected string HostEmail { get; set; }
+        protected bool RequestCallDisabled { get; set; } = false;
         protected CommunicationModel CommModel { get; set; } = null;
 
         protected override async Task OnInitializedAsync()
@@ -44,7 +44,14 @@ namespace BlazorVideoChat.Client.Pages
 
                 StateHasChanged();
             }
+        }
 
+        protected async Task RequestCall()
+        {
+            // Send a post request to create a new CallData entry in the database
+            await _httpClient.PostAsJsonAsync($"api/calldata/{Uri.EscapeDataString(HostEmail)}", CommModel.CommunicationUser.Id);
+            RequestCallDisabled = true;
+            StateHasChanged();
         }
     }
 }

@@ -26,7 +26,7 @@ window.hostVideoChat = {
         hostLocalVideo = localVidDOM;
         hostRemoteVideo = remoteVideoDOM;
 
-        hostCallClient = new CallClient();
+        let hostCallClient = new CallClient();
         const tokenCredential = new AzureCommunicationTokenCredential(USER_ACCESS_TOKEN);
         hostCallAgent = await hostCallClient.createCallAgent(tokenCredential);
         hostDevices = await hostCallClient.getDeviceManager();
@@ -63,7 +63,6 @@ window.hostVideoChat = {
 }
 
 // Variables used by clients attending a call
-let clientCallClient;
 let clientCallAgent;
 let clientDevices;
 let clientLocalVideo;
@@ -78,7 +77,7 @@ window.clientVideoChat = {
         clientLocalVideo = localVidDOM;
         clientRemoteVideo = remoteVideoDOM;
 
-        clientCallClient = new CallClient();
+        let clientCallClient = new CallClient();
         const tokenCredential = new AzureCommunicationTokenCredential(USER_ACCESS_TOKEN);
         clientCallAgent = await clientCallClient.createCallAgent(tokenCredential);
         clientDevices = await clientCallClient.getDeviceManager();

@@ -16,7 +16,6 @@ let localVideo;
 let remoteVideo
 let localRender;
 let localStream;
-let remoteRender;
 let call;
 
 window.videoChat = {

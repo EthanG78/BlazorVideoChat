@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net.Http.Json;
 using BlazorVideoChat.Shared;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Components.Authorization;
 
 namespace BlazorVideoChat.Client.Pages
 {
@@ -15,6 +17,9 @@ namespace BlazorVideoChat.Client.Pages
 
         [Inject]
         IHttpClientFactory _httpClientFactory { get; set; }
+
+        [Inject]
+        AuthenticationStateProvider _authStateProvider { get; set; } 
 
         private HttpClient _httpClient { get; set; }
 
@@ -28,10 +33,22 @@ namespace BlazorVideoChat.Client.Pages
         protected bool CallInputDisabled { get; set; } = false;
         protected bool CallButtonDisabled { get; set; } = false;
         protected bool HangUpButtonDisabled { get; set; } = true;
+        protected List<CallData> InProgressCalls { get; set; } = new List<CallData>();
 
         protected override async Task OnInitializedAsync()
         {
-            _httpClient = _httpClientFactory.CreateClient("BlazorVideoChat.ServerAPI.Public");
+            _httpClient = _httpClientFactory.CreateClient("BlazorVideoChat.ServerAPI.Private");
+
+            // Must be authenticated to be on this page to begin with
+            var authState = await _authStateProvider.GetAuthenticationStateAsync();
+            var userId = authState.User.FindFirst(c => c.Type.Equals("sub"))?.Value;
+            // Get list of in progress calls for authenticated user
+            InProgressCalls = await _httpClient.GetFromJsonAsync<List<CallData>>($"api/calldata/{userId}");
+
+            foreach (var call in InProgressCalls)
+            {
+                Console.WriteLine(call.AttendeeToken);
+            }
 
             await base.OnInitializedAsync();
         }

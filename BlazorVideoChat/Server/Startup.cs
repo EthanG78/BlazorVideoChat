@@ -36,7 +36,10 @@ namespace BlazorVideoChat.Server
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services.AddIdentityServer()
-                .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
+                .AddApiAuthorization<ApplicationUser, ApplicationDbContext>(options =>
+                {
+                    options.IdentityResources["profile"].UserClaims.Add("id");
+                });
 
             services.AddAuthentication()
                 .AddIdentityServerJwt();

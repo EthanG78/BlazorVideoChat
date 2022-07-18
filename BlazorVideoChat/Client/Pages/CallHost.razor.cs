@@ -1,11 +1,7 @@
-﻿using Azure.Communication;
-using Azure.Communication.Identity;
-using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using System;
 using System.Threading.Tasks;
-using BlazorVideoChat.Client.Services;
 using System.Net.Http;
 using System.Net.Http.Json;
 using BlazorVideoChat.Shared;

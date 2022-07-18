@@ -104,10 +104,6 @@ window.videoChat = {
 
     stopcall: async () => {
         try {
-            // dispose of the renderers
-            localRender.dispose();
-            remoteRender.dispose();
-
             // end the current call
             await call.hangUp();
         } catch (err) {

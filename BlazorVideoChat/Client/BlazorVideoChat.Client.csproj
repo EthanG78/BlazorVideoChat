@@ -30,6 +30,7 @@
 
   <ItemGroup>
     <Folder Include="NPM\" />
+    <Folder Include="wwwroot\js\" />
   </ItemGroup>
 
 </Project>

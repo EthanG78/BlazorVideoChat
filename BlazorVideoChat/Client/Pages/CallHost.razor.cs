@@ -52,7 +52,7 @@ namespace BlazorVideoChat.Client.Pages
 
                 if (CommModel is null) throw new ArgumentNullException(nameof(CommModel));
 
-                await _js.InvokeVoidAsync("hostVideoChat.init", CommModel.CommunicationsToken, MyVideo, RemoteVideo);
+                await _js.InvokeVoidAsync("videoChat.init", CommModel.CommunicationsToken, MyVideo, RemoteVideo);
 
                 StateHasChanged();
             }
@@ -62,7 +62,7 @@ namespace BlazorVideoChat.Client.Pages
         protected async Task Call()
         {
             Console.WriteLine(CalleeInput);
-            await _js.InvokeVoidAsync("hostVideoChat.startcall", CalleeInput);
+            await _js.InvokeVoidAsync("videoChat.startcall", CalleeInput);
 
             CallInputDisabled = true;
             CallButtonDisabled = true;
@@ -72,7 +72,7 @@ namespace BlazorVideoChat.Client.Pages
 
         protected async Task HangUp()
         {
-            await _js.InvokeVoidAsync("hostVideoChat.stopcall");
+            await _js.InvokeVoidAsync("videoChat.stopcall");
 
             CallInputDisabled = false;
             CallButtonDisabled = false;

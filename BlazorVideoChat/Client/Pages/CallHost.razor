@@ -3,31 +3,57 @@
 @attribute [Authorize]
 
 <div class="container">
-    <div class="row">
+    <div class="row mb-2">
         <h3>Host a call</h3>
     </div>
-    @if (CommModel == null)
+    @if (CommModel == null || InProgressCalls == null)
     {
-        <p>Generating user identity and token...</p>
+        <div class="row mb-2">
+            <p>Generating user identity and token...</p>
+        </div>
     }
-
-    <div class="row">
-        <label for="basic-url">Select a call request to host</label>
-        <div class="input-group mb-3">
-            <div class="input-group-prepend">
-                <span class="input-group-text" id="basic-addon3">
-                    <span class="oi oi-person" aria-hidden="true"></span>
-                </span>
-
+    else
+    {
+        <div class="row mb-2">
+            <div class="col">
+                <div class="dropdown">
+                    <button class="btn btn-primary dropdown-toggle"
+                            type="button" id="dropdownMenuButton"
+                            data-toggle="dropdown"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                            @onclick="@(() => ShowDropdown = !ShowDropdown)">
+                        Select a call request to host
+                    </button>
+                    <div class="dropdown-menu @(ShowDropdown ? "show" : "")" aria-labelledby="dropdownMenuButton">
+                        @foreach (var call in InProgressCalls)
+                        {
+                            <button class="dropdown-item"
+                                    type="button"
+                                    @onclick="@(() => {
+                                                    ChosenCall = call.AttendeeToken;
+                                                    ShowDropdown = !ShowDropdown;
+                                                })">
+                                @call.AttendeeToken
+                            </button>
+                        }
+                    </div>
+                </div>
             </div>
-            <input type="text" class="form-control" id="basic-url" aria-describedby="basic-addon3" @bind-value="CalleeInput">
+        </div>
+        <div class="row mb-2">
+            <div class="col">
+                <label>Calling: <strong>@(String.IsNullOrEmpty(ChosenCall) ? "PLEASE SELECT A CALL REQUEST" : ChosenCall)</strong></label>
+            </div>
+        </div>
+    }
+    <div class="row mb-2">
+        <div class="col">
+            <button type="button" class="btn btn-primary mb-2" disabled="@(CallButtonDisabled || String.IsNullOrEmpty(ChosenCall))" @onclick="@(() => Call(ChosenCall))">Call</button>
+            <button type="button" class="btn btn-primary ml-2 mb-2" disabled="@HangUpButtonDisabled" @onclick="HangUp">Hangup</button>
         </div>
     </div>
-    <div class="row">
-        <button type="button" class="btn btn-primary ml-2 mb-2" disabled="@CallButtonDisabled" @onclick="Call">Call</button>
-        <button type="button" class="btn btn-primary ml-2 mb-2" disabled="@HangUpButtonDisabled" @onclick="HangUp">Hangup</button>
-    </div>
-    <div class="row">
+    <div class="row mb-2">
         <div class="col">
             <div class="video-container">
                 <div @ref="MyVideo" class="video"></div>

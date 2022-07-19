@@ -7,6 +7,7 @@ using System.Net.Http.Json;
 using BlazorVideoChat.Shared;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Components.Authorization;
+using System.Linq;
 
 namespace BlazorVideoChat.Client.Pages
 {
@@ -26,14 +27,14 @@ namespace BlazorVideoChat.Client.Pages
         protected ElementReference MyVideo { get; set; }
         protected ElementReference RemoteVideo { get; set; }
 
-        protected string CalleeInput { get; set; }
-
         protected CommunicationModel CommModel { get; set; } = null;
 
         protected bool CallInputDisabled { get; set; } = false;
         protected bool CallButtonDisabled { get; set; } = false;
         protected bool HangUpButtonDisabled { get; set; } = true;
-        protected List<CallData> InProgressCalls { get; set; } = new List<CallData>();
+        protected bool ShowDropdown { get; set; } = false;
+        protected List<CallData> InProgressCalls { get; set; }
+        protected string ChosenCall { get; set; } = String.Empty;
 
         protected override async Task OnInitializedAsync()
         {
@@ -45,12 +46,14 @@ namespace BlazorVideoChat.Client.Pages
             // Get list of in progress calls for authenticated user
             InProgressCalls = await _httpClient.GetFromJsonAsync<List<CallData>>($"api/calldata/{userId}");
 
-            foreach (var call in InProgressCalls)
+            foreach(var call in InProgressCalls)
             {
                 Console.WriteLine(call.AttendeeToken);
             }
 
             await base.OnInitializedAsync();
+
+            StateHasChanged();
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -72,10 +75,10 @@ namespace BlazorVideoChat.Client.Pages
 
         }
 
-        protected async Task Call()
+        protected async Task Call(string AttendeeToken)
         {
-            Console.WriteLine(CalleeInput);
-            await _js.InvokeVoidAsync("videoChat.startcall", CalleeInput);
+            Console.WriteLine(AttendeeToken);
+            await _js.InvokeVoidAsync("videoChat.startcall", AttendeeToken);
 
             CallInputDisabled = true;
             CallButtonDisabled = true;
@@ -90,6 +93,12 @@ namespace BlazorVideoChat.Client.Pages
             CallInputDisabled = false;
             CallButtonDisabled = false;
             HangUpButtonDisabled = true;
+
+            // update the call to no longer be in progress
+            CallData call = InProgressCalls.FirstOrDefault(c => c.AttendeeToken.Equals(ChosenCall));
+            call.IsInProgress = false;
+            await _httpClient.PutAsJsonAsync($"api/calldata/", call);
+
             StateHasChanged();
         }
     }

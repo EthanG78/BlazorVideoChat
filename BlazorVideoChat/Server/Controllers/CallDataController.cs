@@ -66,5 +66,28 @@ namespace BlazorVideoChat.Server.Controllers
             await _db.SaveChangesAsync();
             return Ok(call);
         }
+
+        /**
+         * Update an existing entry with the passed CallData object, or
+         * create a new CallData object in the database if one with the
+         * passed id does not exist.
+         */
+        [HttpPut]
+        public async Task<IActionResult> UpdateCall([FromBody] CallData call)
+        {
+            var oldCall = _db.CallData.FirstOrDefault(c => c.Id.CompareTo(call.Id) == 0);
+
+            if (oldCall == null)
+            {
+                _db.Add(call);
+            }
+            else
+            {
+                _db.Entry(oldCall).CurrentValues.SetValues(call);
+            }
+
+            await _db.SaveChangesAsync();
+            return Ok(call);
+        }
     }
 }

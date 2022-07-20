@@ -8,8 +8,6 @@ import {
     AzureCommunicationTokenCredential
 } from '@azure/communication-common';
 
-
-
 let callAgent;
 let devices;
 let localVideo;
